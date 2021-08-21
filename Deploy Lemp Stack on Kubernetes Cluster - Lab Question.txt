@@ -1,0 +1,27 @@
+Task Details
+The Nautilus DevOps team want to deploy a WordPress website on Kubernetes cluster. They are going to use Nginx, phpfpm and MySQL for the database. The team had already gathered the requirements and now they want to make this website live. Below you can find more details:
+a. Create some secrets for MySQL.
+1.	Create a secret named mysql-root-pass wih key/value pairs as below:
+name: password and value: R00t
+2.	Create a secret named mysql-user-pass with key/value pairs as below
+name: username, value: kodekloud_joy and name: password, value: YchZHRcLkL
+3.	Create a secret named mysql-db-url with key/value pairs as below:
+name: database and value: kodekloud_db6
+4.	Create a secret named mysql-host with key/value pairs as below:
+name: host and value: mysql-service
+b. We already have a database dump which is placed under /tmp/db.sql on jump_host. Once deployment is done, copy that dump into the MySQL container and import the same in newly created database kodekloud_db6.
+
+FOR FRONTEND TIER:
+a. Create a configMap which should be named as nginx-config, use nginx configuration in configMap with configurations as document root should be /var/www/html and add a directory index 'index index.html index.htm index.php'.
+b. Create a deployment to deploy nginx and phpfpm, use any nginx image for nginx container and any wordpress image with fpm like wordpress:php7.2-fpm for phpfpm container. For phpfpm container the database related environment variables should be MYSQL_DATABASE, MYSQL_USER, MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD and MYSQL_HOST, further these should fetch values from the secrets, you created. Configure other spec as per your choice.
+c. Create a shared volume and a configmap volume, map the shared volume in both containers at location /var/www/html, and mount another volume at location /etc/nginx/nginx.conf in nginx container only.
+d. Create a node port type service for nginx deployment which should be named as nginx-service and the nodePort should be 30008.
+
+
+FOR BACKEND TIER:
+a. Create a persitentVolume for MySQL which should be named as mysql-pv, set other parameters as per your choice.
+b. Create a persistentVolumeClaim named mysql-pv-claim for MySQL to use the persistent volume you created, set the parameters as per your choice.
+c. Create a deployment for MySQL which should be named mysql-deployment, use any appropriate mysql image like mysql:5.6 and set other parameters as per your choice. Define database related environment variables MYSQL_DATABASE, MYSQL_USER, MYSQL_ROOT_PASSWORD, MYSQL_PASSWORD and MYSQL_HOST, these should fetch values from secrets you created. Volume should be mounted at location /var/lib/mysql in mysql container.
+d. Make changes in WordPress configuration file to update database related details, please do not hard code database details in the configuration.
+e. The WordPress website should run properly on nginx service nodePort.
+Note: The kubectl on jump_host has been configured to work with the kubernetes cluster
